@@ -39,6 +39,10 @@ namespace Monogame_Platformer_Demo
             platforms.Add(new Rectangle(350,250, 75,20));
             platforms.Add(new Rectangle(200,300,75,20));
             platforms.Add(new Rectangle(150, 10, 75, 20));
+            platforms.Add(new Rectangle(450, 175, 75, 20));
+            platforms.Add(new Rectangle(550, 100, 75, 20));
+            platforms.Add(new Rectangle(650, 200, 75, 20));
+            platforms.Add(new Rectangle(550, 300, 75, 20));
 
             gravity = 0.3f; // how fast player accelerated downwards
             jumpSpeed = 8f; // the strength of the jump
