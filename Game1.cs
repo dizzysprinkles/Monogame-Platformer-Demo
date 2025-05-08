@@ -16,6 +16,10 @@ namespace Monogame_Platformer_Demo
 
         List<Rectangle> platforms;
 
+        KeyboardState keyboardState;
+        float gravity, jumpSpeed;
+        bool onGround;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -35,7 +39,10 @@ namespace Monogame_Platformer_Demo
             platforms.Add(new Rectangle(350,250, 75,20));
             platforms.Add(new Rectangle(200,300,75,20));
             platforms.Add(new Rectangle(150, 10, 75, 20));
-            
+
+            gravity = 0.3f; // how fast player accelerated downwards
+            jumpSpeed = 8f; // the strength of the jump
+            onGround = false;
 
             base.Initialize();
         }
@@ -49,10 +56,67 @@ namespace Monogame_Platformer_Demo
 
         protected override void Update(GameTime gameTime)
         {
+            keyboardState = Keyboard.GetState();
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            speed.X = 0f;
+            if (keyboardState.IsKeyDown(Keys.A))
+            {
+                speed.X += -2f;
+            }
+            if (keyboardState.IsKeyDown(Keys.D))
+            {
+                speed.X += 2f;
+            }
+            playerPosition.X += speed.X;
+            player.Location = playerPosition.ToPoint();
+
+            foreach (Rectangle platform in platforms)
+                if (player.Intersects(platform))
+                {
+                    playerPosition.X += -speed.X;
+                    player.Location = playerPosition.ToPoint();
+                }
+
+            if (!onGround) // Applies gravity in beginning
+            {
+                speed.Y += gravity;
+                if (speed.Y < 0 && keyboardState.IsKeyUp(Keys.Space)) // Lets user control the jump based on how long they hold the spacebar!
+                {
+                    speed.Y /= 1.5f; //0f is jarring. Dividing it makes it smoother
+                }
+            }
+            else if (keyboardState.IsKeyDown(Keys.Space)) // Jumps
+            {
+                speed.Y -= jumpSpeed;
+                onGround = false;
+            }
+            else // Applies Gravity 24/7
+            {
+                speed.Y += gravity;
+            }
+            playerPosition.Y += speed.Y;
+            player.Location = playerPosition.ToPoint();
+
+            foreach (Rectangle platform in platforms)
+            {
+                if (player.Intersects(platform))
+                {
+                    if (speed.Y > 0f) // lands on top platform
+                    {
+                        onGround = true;
+                        speed.Y = 0;
+                        playerPosition.Y = platform.Y - player.Height;
+                    }
+                    else //hits bottom of platform
+                    {
+                        speed.Y = 0;
+                        playerPosition.Y = platform.Bottom;
+                    }
+                    player.Location = playerPosition.ToPoint();
+                }
+            }
 
             base.Update(gameTime);
         }
